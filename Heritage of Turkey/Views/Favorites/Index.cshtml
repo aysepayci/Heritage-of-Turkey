@@ -1,0 +1,107 @@
+﻿@model Heritage_of_Turkey.ViewModels.Favorites.FavoriteListViewModel
+
+@{
+    ViewData["Title"] = "My Favorites";
+}
+
+<section class="bg-white border-bottom">
+    <div class="container py-5">
+        <div class="row align-items-end g-4">
+            <div class="col-12 col-lg-8">
+                <span class="badge rounded-pill text-bg-primary mb-3">Favorites</span>
+                <h1 class="display-6 fw-bold mb-3">My favorite places</h1>
+                <p class="lead text-muted mb-0">
+                    Keep track of museums and ruins you want to revisit or explore later.
+                </p>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="bg-light rounded-3 p-3 text-lg-end">
+                    <div class="h3 fw-bold mb-0">@Model.TotalCount</div>
+                    <div class="text-muted">favorite@(Model.TotalCount == 1 ? "" : "s") saved</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        @if (Model.Items.Any())
+        {
+            <div class="row g-4">
+                @foreach (var item in Model.Items)
+                {
+                    var location = string.IsNullOrWhiteSpace(item.District)
+                    ? item.City
+                    : $"{item.City}, {item.District}";
+
+                    var detailsController = item.ItemType == "Museum" ? "Museum" : "Ruin";
+                    var itemTypeBadgeClass = item.ItemType == "Museum" ? "text-bg-primary" : "text-bg-success";
+
+
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" class="card-img-top object-fit-cover" style="height: 230px;" alt="@item.Title" />
+                            }
+                            else
+                            {
+                                <div class="card-img-top bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 230px;">
+                                    <span class="h5 text-primary mb-0">@item.ItemType</span>
+                                </div>
+                            }
+
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                    <span class="badge text-bg-light">@item.CategoryName</span>
+                                    <span class="badge @itemTypeBadgeClass">@item.ItemType</span>
+                                </div>
+
+                                <h2 class="h5 card-title">@item.Title</h2>
+                                <p class="text-muted small mb-2">@location</p>
+                                <p class="card-text text-muted flex-grow-1">
+                                    @(item.Description.Length > 145 ? item.Description.Substring(0, 145) + "..." : item.Description)
+                                </p>
+
+                                <div class="d-flex justify-content-between align-items-center gap-3 mt-2">
+                                    <a asp-area="" asp-controller="@detailsController" asp-action="Details" asp-route-id="@item.ItemId" class="btn btn-primary">View Details</a>
+
+                                    @if (item.ItemType == "Museum")
+                                    {
+                                        <form asp-area="" asp-controller="Favorites" asp-action="RemoveMuseum" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="museumId" value="@item.ItemId" />
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                            <button type="submit" class="btn btn-outline-danger">Remove</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-area="" asp-controller="Favorites" asp-action="RemoveRuin" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="ruinId" value="@item.ItemId" />
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                            <button type="submit" class="btn btn-outline-danger">Remove</button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="bg-white rounded-3 shadow-sm p-4 p-md-5 text-center">
+                <h2 class="h4 fw-bold mb-3">No favorites yet</h2>
+                <p class="text-muted mb-4">Start exploring museums and ruins, then save the places that catch your attention.</p>
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                    <a asp-area="" asp-controller="Museum" asp-action="Index" class="btn btn-primary">Explore Museums</a>
+                    <a asp-area="" asp-controller="Ruin" asp-action="Index" class="btn btn-outline-primary">Explore Ruins</a>
+                </div>
+            </div>
+        }
+    </div>
+</section>

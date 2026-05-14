@@ -1,0 +1,256 @@
+@model Heritage_of_Turkey.ViewModels.Museum.MuseumDetailViewModel
+
+@{
+    ViewData["Title"] = Model.MuseumName;
+    var location = string.IsNullOrWhiteSpace(Model.District)
+        ? Model.City
+        : $"{Model.City}, {Model.District}";
+}
+
+@*  Hero  *@
+<section style="background-color:var(--surface);border-bottom:1px solid var(--border-soft);">
+    <div class="container py-5">
+        <div class="row g-5 align-items-center">
+            <div class="col-12 col-lg-6">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <a asp-controller="Museum" asp-action="Index" asp-route-categoryId="@Model.CategoryId"
+                       class="badge text-bg-primary text-decoration-none">@Model.CategoryName</a>
+                    @if (Model.IsFeatured)
+                    {
+                        <span class="badge badge-gold">Featured</span>
+                    }
+                </div>
+
+                <h1 style="font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;margin-bottom:.6rem;">
+                    @Model.MuseumName
+                </h1>
+                <p style="color:var(--text-muted);font-size:1rem;margin-bottom:1.25rem;">📍 @location</p>
+
+                <div class="mb-4">
+                    @if (Model.AverageRating.HasValue)
+                    {
+                        <span class="rating-stars me-2">
+                            @for (var i = 1; i <= 5; i++)
+                            {
+                                <span>@(i <= Math.Round(Model.AverageRating.Value) ? "★" : "☆")</span>
+                            }
+                        </span>
+                        <span style="color:var(--text-muted);font-size:.9rem;">
+                            @Model.AverageRating.Value.ToString("0.0") — @Model.ReviewCount review@(Model.ReviewCount == 1 ? "" : "s")
+                        </span>
+                    }
+                    else
+                    {
+                        <span style="color:var(--text-muted);font-size:.9rem;">No ratings yet.</span>
+                    }
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row flex-wrap gap-2 mb-3">
+                    <a asp-controller="Museum" asp-action="Index" class="btn btn-outline-primary">← Back to Museums</a>
+                    @if (!string.IsNullOrWhiteSpace(Model.Website))
+                    {
+                        <a href="@Model.Website" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Official Website</a>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.GoogleMapsUrl))
+                    {
+                        <a href="@Model.GoogleMapsUrl" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">View on Maps</a>
+                    }
+                </div>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    if (Model.IsFavorite)
+                    {
+                        <form asp-controller="Favorites" asp-action="RemoveMuseum" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="museumId" value="@Model.MuseumId" />
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                            <button type="submit" class="btn btn-outline-danger">♥ Remove Favorite</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-controller="Favorites" asp-action="AddMuseum" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="museumId" value="@Model.MuseumId" />
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                            <button type="submit" class="btn btn-success">♡ Add to Favorites</button>
+                        </form>
+                    }
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login"
+                       asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString"
+                       class="btn btn-success">Login to Favorite</a>
+                }
+            </div>
+
+            <div class="col-12 col-lg-6">
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="img-fluid w-100 object-fit-cover"
+                         style="border-radius:var(--radius-xl);border:1px solid var(--border-soft);max-height:420px;"
+                         alt="@Model.MuseumName" />
+                }
+                else
+                {
+                    <div class="d-flex align-items-center justify-content-center"
+                         style="min-height:320px;background:var(--surface-inset);border-radius:var(--radius-xl);border:1px solid var(--border-soft);">
+                        <span style="font-size:4rem;opacity:.25;">🏛️</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@*  Detail body  *@
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            @*  Description  *@
+            <div class="col-12 col-lg-8">
+                <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);padding:2rem 2.25rem;">
+                    <span class="display-heading d-block mb-2">About</span>
+                    <h2 style="font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin-bottom:1.25rem;">About This Museum</h2>
+                    <p style="color:var(--text-secondary);white-space:pre-line;line-height:1.85;margin:0;">@Model.Description</p>
+                </div>
+            </div>
+
+            @*  Info card  *@
+            <div class="col-12 col-lg-4">
+                <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);overflow:hidden;">
+                    <div style="background:var(--surface-soft);padding:.85rem 1.5rem;border-bottom:1px solid var(--border-faint);">
+                        <span class="display-heading">Visitor Information</span>
+                    </div>
+                    <div style="padding:1.25rem 1.5rem;">
+                        <dl class="row mb-0" style="font-size:.9rem;row-gap:.75rem;">
+                            <dt class="col-5" style="color:var(--text-muted);font-weight:500;">Category</dt>
+                            <dd class="col-7 mb-0">@Model.CategoryName</dd>
+
+                            <dt class="col-5" style="color:var(--text-muted);font-weight:500;">City</dt>
+                            <dd class="col-7 mb-0">@location</dd>
+
+                            <dt class="col-5" style="color:var(--text-muted);font-weight:500;">Address</dt>
+                            <dd class="col-7 mb-0">@Model.Address</dd>
+
+                            <dt class="col-5" style="color:var(--text-muted);font-weight:500;">Ticket</dt>
+                            <dd class="col-7 mb-0">
+                                @if (Model.TicketPrice.HasValue)
+                                {
+                                    <strong style="color:var(--success);">@Model.TicketPrice.Value.ToString("C")</strong>
+                                }
+                                else { <span>Not listed</span> }
+                            </dd>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.OpeningHours))
+                            {
+                                <dt class="col-5" style="color:var(--text-muted);font-weight:500;">Hours</dt>
+                                <dd class="col-7 mb-0">@Model.OpeningHours</dd>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+                            {
+                                <dt class="col-5" style="color:var(--text-muted);font-weight:500;">Phone</dt>
+                                <dd class="col-7 mb-0"><a href="tel:@Model.PhoneNumber" class="text-decoration-none">@Model.PhoneNumber</a></dd>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(Model.Email))
+                            {
+                                <dt class="col-5" style="color:var(--text-muted);font-weight:500;">Email</dt>
+                                <dd class="col-7 mb-0"><a href="mailto:@Model.Email" class="text-decoration-none">@Model.Email</a></dd>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(Model.GoogleMapsUrl))
+                            {
+                                <dt class="col-5" style="color:var(--text-muted);font-weight:500;">Map</dt>
+                                <dd class="col-7 mb-0"><a href="@Model.GoogleMapsUrl" target="_blank" rel="noopener noreferrer" class="text-decoration-none">View on Google Maps</a></dd>
+                            }
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@*  Reviews  *@
+<section class="pb-5">
+    <div class="container">
+        <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);padding:2rem 2.25rem;">
+            <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+                <div>
+                    <span class="display-heading d-block mb-1">Visitor Reviews</span>
+                    <h2 style="font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin:0;">Reviews</h2>
+                    @if (Model.AverageRating.HasValue)
+                    {
+                        <p style="color:var(--text-muted);font-size:.88rem;margin-top:.25rem;margin-bottom:0;">
+                            @Model.AverageRating.Value.ToString("0.0") average — @Model.ReviewCount review@(Model.ReviewCount == 1 ? "" : "s")
+                        </p>
+                    }
+                    else { <p style="color:var(--text-muted);font-size:.88rem;margin:0;">No ratings yet.</p> }
+                </div>
+            </div>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <form asp-controller="Museum" asp-action="AddReview" method="post"
+                      style="background:var(--surface-soft);border:1px solid var(--border-faint);border-radius:var(--radius-md);padding:1.5rem;"
+                      class="mb-4" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="museumId" value="@Model.MuseumId" />
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label asp-for="NewReview.Rating" class="form-label">Rating</label>
+                            <select asp-for="NewReview.Rating" class="form-select">
+                                <option value="">Select rating</option>
+                                <option value="5">★★★★★ (5)</option>
+                                <option value="4">★★★★☆ (4)</option>
+                                <option value="3">★★★☆☆ (3)</option>
+                                <option value="2">★★☆☆☆ (2)</option>
+                                <option value="1">★☆☆☆☆ (1)</option>
+                            </select>
+                            <span asp-validation-for="NewReview.Rating" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="NewReview.CommentText" class="form-label">Comment</label>
+                            <textarea asp-for="NewReview.CommentText" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="NewReview.CommentText" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Submit Review</button>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-info">Please <a asp-controller="Account" asp-action="Login">login</a> to leave a review.</div>
+            }
+
+            @if (Model.Reviews.Any())
+            {
+                <div class="vstack gap-3">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <article class="review-item">
+                            <div class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-2">
+                                <div>
+                                    <div style="font-family:var(--font-display);font-weight:600;color:var(--text);">@review.UserEmail</div>
+                                    <div class="rating-stars">
+                                        @for (var i = 1; i <= 5; i++)
+                                        {
+                                            <span>@(i <= review.Rating ? "★" : "☆")</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div style="color:var(--text-muted);font-size:.8rem;">@review.CreatedAt.ToString("dd MMM yyyy HH:mm")</div>
+                            </div>
+                            <p style="color:var(--text-secondary);white-space:pre-line;margin:0;font-size:.93rem;">@review.CommentText</p>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

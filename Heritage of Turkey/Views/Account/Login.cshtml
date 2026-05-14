@@ -1,0 +1,75 @@
+@model Heritage_of_Turkey.ViewModels.Account.LoginViewModel
+
+@{
+    ViewData["Title"] = "Log In";
+}
+
+<section class="py-5 py-lg-6">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+                <div class="card" style="border-color:var(--border-soft) !important;">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <div aria-hidden="true" style="font-size:2.2rem;margin-bottom:.75rem;color:var(--gold);">⚜</div>
+                            <span class="display-heading d-block mb-1">Welcome Back</span>
+                            <h1 style="font-family:var(--font-display);font-size:1.9rem;font-weight:600;margin-bottom:.4rem;">Log In</h1>
+                            <p style="color:var(--text-muted);font-size:.88rem;margin:0;">Access your account to manage your favorites.</p>
+                        </div>
+
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                @TempData["SuccessMessage"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        <form asp-controller="Account" asp-action="Login" method="post"
+                              asp-route-returnUrl="@Model.ReturnUrl" novalidate>
+                            @Html.AntiForgeryToken()
+
+                            @if (ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                            {
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                            }
+                            <input asp-for="ReturnUrl" type="hidden" />
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" autocomplete="email" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+
+                            <div class="form-check mb-4">
+                                <input asp-for="RememberMe" class="form-check-input" />
+                                <label asp-for="RememberMe" class="form-check-label" style="font-size:.88rem;color:var(--text-secondary);"></label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Log In</button>
+                        </form>
+
+                        <hr class="gold-divider my-4" />
+
+                        <div class="text-center" style="font-size:.88rem;">
+                            <span style="color:var(--text-muted);">Don't have an account?</span>
+                            <a asp-controller="Account" asp-action="Register"
+                               asp-route-returnUrl="@Model.ReturnUrl"
+                               style="margin-left:.35rem;font-weight:600;">Create one</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,47 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var displayName = currentUser != null
+        ? $"{currentUser.FirstName} {currentUser.LastName}".Trim()
+        : User.Identity?.Name;
+
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            @displayName
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+            <li>
+                <a class="dropdown-item" asp-area="" asp-controller="Favorites" asp-action="Index">My Favorites</a>
+            </li>
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a class="dropdown-item" asp-route="AdminDashboard">Admin Panel</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-route="AdminContactMessages">Contact Messages</a>
+                </li>
+            }
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="px-3">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-link dropdown-item p-0 text-start">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+    </li>
+    <li class="nav-item ms-lg-2">
+        <a class="btn btn-primary btn-sm px-3" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+    </li>
+}

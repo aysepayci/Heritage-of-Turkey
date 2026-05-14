@@ -1,0 +1,234 @@
+﻿@model Heritage_of_Turkey.ViewModels.Ruin.RuinDetailViewModel
+
+@{
+    ViewData["Title"] = Model.RuinName;
+    var location = string.IsNullOrWhiteSpace(Model.District)
+        ? Model.City
+        : $"{Model.City}, {Model.District}";
+}
+
+<section class="bg-white border-bottom">
+    <div class="container py-5">
+        <div class="row g-5 align-items-center">
+            <div class="col-12 col-lg-6">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <a asp-controller="Ruin" asp-action="Index" asp-route-categoryId="@Model.CategoryId" class="badge text-bg-success text-decoration-none">
+                        @Model.CategoryName
+                    </a>
+                    @if (Model.IsFeatured)
+                    {
+                        <span class="badge text-bg-primary">Featured</span>
+                    }
+                </div>
+
+                <h1 class="display-6 fw-bold mb-3">@Model.RuinName</h1>
+                <p class="lead text-muted mb-4">@location</p>
+                <div class="mb-4">
+                    @if (Model.AverageRating.HasValue)
+                    {
+                        <span class="rating-stars me-2">
+                            @for (var i = 1; i <= 5; i++)
+                            {
+                                <span>@(i <= Math.Round(Model.AverageRating.Value) ? "★" : "☆")</span>
+                            }
+                        </span>
+                        <span class="text-muted">@Model.AverageRating.Value.ToString("0.0") average from @Model.ReviewCount review@(Model.ReviewCount == 1 ? "" : "s")</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No ratings yet.</span>
+                    }
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row gap-3">
+                    <a asp-controller="Ruin" asp-action="Index" class="btn btn-outline-primary">Back to Ruins</a>
+                    @if (!string.IsNullOrWhiteSpace(Model.GoogleMapsUrl))
+                    {
+                        <a href="@Model.GoogleMapsUrl" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">View on Google Maps</a>
+                    }
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        if (Model.IsFavorite)
+                        {
+                            <form asp-controller="Favorites" asp-action="RemoveRuin" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ruinId" value="@Model.RuinId" />
+                                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                <button type="submit" class="btn btn-outline-danger">Remove Favorite</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-controller="Favorites" asp-action="AddRuin" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ruinId" value="@Model.RuinId" />
+                                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                <button type="submit" class="btn btn-success">Add to Favorites</button>
+                            </form>
+                        }
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" class="btn btn-success">Login to Favorite</a>
+                    }
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="img-fluid rounded-3 shadow-sm w-100 object-fit-cover" style="max-height: 420px;" alt="@Model.RuinName" />
+                }
+                else
+                {
+                    <div class="rounded-3 bg-success bg-opacity-10 d-flex align-items-center justify-content-center shadow-sm" style="min-height: 320px;">
+                        <span class="h4 text-success mb-0">Ruin</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-12 col-lg-8">
+                <div class="bg-white rounded-3 shadow-sm p-4 p-md-5">
+                    <h2 class="h4 fw-bold mb-3">About this ruin</h2>
+                    <p class="text-muted mb-0" style="white-space: pre-line;">@Model.Description</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="bg-white rounded-3 shadow-sm p-4">
+                    <h2 class="h5 fw-bold mb-4">Visitor Information</h2>
+
+                    <dl class="row mb-0 gy-3">
+                        <dt class="col-5 text-muted">Category</dt>
+                        <dd class="col-7 mb-0">@Model.CategoryName</dd>
+
+                        <dt class="col-5 text-muted">City</dt>
+                        <dd class="col-7 mb-0">@location</dd>
+
+                        <dt class="col-5 text-muted">Address</dt>
+                        <dd class="col-7 mb-0">@Model.Address</dd>
+
+                        <dt class="col-5 text-muted">Ticket Price</dt>
+                        <dd class="col-7 mb-0">
+                            @if (Model.TicketPrice.HasValue)
+                            {
+                                <span>@Model.TicketPrice.Value.ToString("C")</span>
+                            }
+                            else
+                            {
+                                <span>Not listed</span>
+                            }
+                        </dd>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.OpeningHours))
+                        {
+                            <dt class="col-5 text-muted">Opening Hours</dt>
+                            <dd class="col-7 mb-0">@Model.OpeningHours</dd>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.HistoricalPeriod))
+                        {
+                            <dt class="col-5 text-muted">Historical Period</dt>
+                            <dd class="col-7 mb-0">@Model.HistoricalPeriod</dd>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.GoogleMapsUrl))
+                        {
+                            <dt class="col-5 text-muted">Map</dt>
+                            <dd class="col-7 mb-0">
+                                <a href="@Model.GoogleMapsUrl" target="_blank" rel="noopener noreferrer" class="text-decoration-none">View on Google Maps</a>
+                            </dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pb-5">
+    <div class="container">
+        <div class="bg-white rounded-3 shadow-sm p-4 p-md-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h4 fw-bold mb-1">Reviews</h2>
+                    @if (Model.AverageRating.HasValue)
+                    {
+                        <p class="text-muted mb-0">@Model.AverageRating.Value.ToString("0.0") average rating from @Model.ReviewCount review@(Model.ReviewCount == 1 ? "" : "s").</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">No ratings yet.</p>
+                    }
+                </div>
+            </div>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <form asp-controller="Ruin" asp-action="AddReview" method="post" class="border rounded-3 p-3 p-md-4 mb-4" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ruinId" value="@Model.RuinId" />
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label asp-for="NewReview.Rating" class="form-label">Rating</label>
+                            <select asp-for="NewReview.Rating" class="form-select">
+                                <option value="">Select rating</option>
+                                <option value="5">5 stars</option>
+                                <option value="4">4 stars</option>
+                                <option value="3">3 stars</option>
+                                <option value="2">2 stars</option>
+                                <option value="1">1 star</option>
+                            </select>
+                            <span asp-validation-for="NewReview.Rating" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="NewReview.CommentText" class="form-label"></label>
+                            <textarea asp-for="NewReview.CommentText" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="NewReview.CommentText" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-3">Submit Review</button>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-info">Please login to leave a review.</div>
+            }
+
+            @if (Model.Reviews.Any())
+            {
+                <div class="vstack gap-3">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <article class="review-item border rounded-3 p-3">
+                            <div class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-2">
+                                <div>
+                                    <div class="fw-semibold">@review.UserEmail</div>
+                                    <div class="rating-stars">
+                                        @for (var i = 1; i <= 5; i++)
+                                        {
+                                            <span>@(i <= review.Rating ? "★" : "☆")</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="text-muted small">@review.CreatedAt.ToString("dd MMM yyyy HH:mm")</div>
+                            </div>
+                            <p class="mb-0 text-muted" style="white-space: pre-line;">@review.CommentText</p>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

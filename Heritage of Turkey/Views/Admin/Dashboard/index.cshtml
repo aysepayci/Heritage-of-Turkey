@@ -1,0 +1,141 @@
+@model Heritage_of_Turkey.ViewModels.Admin.DashboardViewModel
+@using Heritage_of_Turkey.Models
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+@*  Header card  *@
+<div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);padding:1.75rem 2rem;margin-bottom:1.5rem;position:relative;overflow:hidden;">
+    <div aria-hidden="true" style="position:absolute;top:0;right:0;bottom:0;width:40%;background:radial-gradient(ellipse at 80% 50%,var(--gold-glow) 0%,transparent 70%);pointer-events:none;"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-deep),var(--gold-light),var(--gold-deep));"></div>
+    <div class="row align-items-end g-4" style="position:relative;">
+        <div class="col-12 col-lg-8">
+            <span class="display-heading d-block mb-2">Admin Panel</span>
+            <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:700;margin-bottom:.5rem;">Dashboard</h1>
+            <p style="color:var(--text-secondary);margin:0;font-size:.93rem;">
+                Monitor museums, ruins, categories, favorites, users, and contact messages.
+            </p>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div style="background:var(--surface-soft);border:1px solid var(--border-faint);border-radius:var(--radius-md);padding:1rem 1.25rem;text-align:right;">
+                <div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--text);">@Model.UnreadContactMessages</div>
+                <div style="font-family:var(--font-heading);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);">
+                    Unread Message@(Model.UnreadContactMessages == 1 ? "" : "s")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*  Stat cards  *@
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;height:100%;">
+            <div style="font-family:var(--font-heading);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.4rem;">Museums</div>
+            <div style="font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--text);line-height:1;">@Model.TotalMuseums</div>
+            <div style="font-size:.78rem;color:var(--text-muted);margin-top:.35rem;">@Model.ActiveMuseums active · @Model.FeaturedMuseums featured</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;height:100%;">
+            <div style="font-family:var(--font-heading);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.4rem;">Ruins</div>
+            <div style="font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--text);line-height:1;">@Model.TotalRuins</div>
+            <div style="font-size:.78rem;color:var(--text-muted);margin-top:.35rem;">@Model.ActiveRuins active · @Model.FeaturedRuins featured</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;height:100%;">
+            <div style="font-family:var(--font-heading);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.4rem;">Categories</div>
+            <div style="font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--text);line-height:1;">@Model.TotalCategories</div>
+            <div style="font-size:.78rem;color:var(--text-muted);margin-top:.35rem;">@Model.ActiveCategories active categories</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <div style="background:linear-gradient(135deg,var(--gold-deep),var(--gold-light));border-radius:var(--radius-lg);padding:1.25rem 1.5rem;height:100%;">
+            <div style="font-family:var(--font-heading);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:.4rem;">Favorites</div>
+            <div style="font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:#fff;line-height:1;">@Model.TotalFavorites</div>
+            <div style="font-size:.78rem;color:rgba(255,255,255,.7);margin-top:.35rem;">@Model.TotalUsers registered user@(Model.TotalUsers == 1 ? "" : "s")</div>
+        </div>
+    </div>
+</div>
+
+@*  Content grid  *@
+<div class="row g-4">
+    @*  Recent messages table  *@
+    <div class="col-12 col-xl-7">
+        <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);overflow:hidden;height:100%;">
+            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-faint);display:flex;flex-direction:column;gap:.5rem;"
+                 class="flex-md-row justify-content-md-between align-items-md-center">
+                <div>
+                    <span class="display-heading d-block mb-1">Recent Messages</span>
+                    <h2 style="font-family:var(--font-display);font-size:1.15rem;font-weight:600;margin:0;">Contact Messages</h2>
+                </div>
+                <a asp-controller="ContactMessages" asp-action="Index" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+
+            @if (Model.RecentContactMessages.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover admin-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Sender</th>
+                                <th scope="col">Subject</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var message in Model.RecentContactMessages)
+                            {
+                                <tr>
+                                    <td>
+                                        <div style="font-family:var(--font-body);font-weight:600;font-size:.9rem;">@message.Name</div>
+                                        <a href="mailto:@message.Email" style="font-size:.78rem;text-decoration:none;color:var(--text-muted);">@message.Email</a>
+                                    </td>
+                                    <td style="font-size:.88rem;">@(string.IsNullOrWhiteSpace(message.Subject) ? "No subject" : message.Subject)</td>
+                                    <td style="font-size:.78rem;color:var(--text-muted);">@message.CreatedAt.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        @if (message.Status == ContactMessageStatus.Replied)
+                                        {
+                                            <span class="badge text-bg-success">Replied</span>
+                                        }
+                                        else if (message.Status == ContactMessageStatus.Read)
+                                        {
+                                            <span class="badge badge-muted">Read</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge" style="background:rgba(184,146,42,.18);color:var(--gold-deep);font-family:var(--font-heading);font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;padding:.25em .65em;border-radius:3px;">Unread</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:.9rem;">No contact messages yet.</div>
+            }
+        </div>
+    </div>
+
+    @*  Quick actions  *@
+    <div class="col-12 col-xl-5">
+        <div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);padding:1.5rem;height:100%;">
+            <span class="display-heading d-block mb-2">Admin Actions</span>
+            <h2 style="font-family:var(--font-display);font-size:1.15rem;font-weight:600;margin-bottom:1.25rem;">Quick Actions</h2>
+            <div class="d-grid gap-2">
+                <a asp-controller="MuseumAdmin" asp-action="Create" class="btn btn-primary">+ Add Museum</a>
+                <a asp-controller="RuinAdmin" asp-action="Create" class="btn btn-primary">+ Add Ruin</a>
+                <a asp-controller="CategoryAdmin" asp-action="Create" class="btn btn-outline-primary">+ Add Category</a>
+                <a asp-controller="ContactMessages" asp-action="Index" class="btn"
+                   style="border:1px solid var(--border-soft);color:var(--text-secondary);background:transparent;">Review Messages</a>
+            </div>
+        </div>
+    </div>
+</div>

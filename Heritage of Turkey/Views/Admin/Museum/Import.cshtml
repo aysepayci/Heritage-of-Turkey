@@ -1,0 +1,250 @@
+﻿@{
+    ViewData["Title"] = "Import Museums from CSV";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-csv"></i> CSV ile Müze Toplu Ekleme
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    <!-- Yükleme Alanı -->
+                    <div id="uploadSection" class="mb-4">
+                        <div class="alert alert-info" role="alert">
+                            <strong>📋 CSV Formatı:</strong> MuseumName, City, Address, Description, CategoryName, ImageUrl, TicketPrice, OpeningHours, PhoneNumber, Email, Website, GoogleMapsUrl, District, IsFeatured, IsActive
+                        </div>
+
+                        <form id="uploadForm">
+                            <div class="form-group">
+                                <label for="csvFile" class="form-label">CSV Dosyası Seçin</label>
+                                <input type="file" class="form-control" id="csvFile" name="csvFile" accept=".csv" required>
+                                <small class="text-muted">Maksimum 5MB, .csv formatı</small>
+                            </div>
+
+                            <button type="button" class="btn btn-primary" id="validateBtn">
+                                <i class="fas fa-check-circle"></i> Kontrol Et & Önizle
+                            </button>
+                            <a href="@Url.Action("Index", "MuseumAdmin")" class="btn btn-secondary">
+                                <i class="fas fa-times-circle"></i> İptal
+                            </a>
+                        </form>
+                    </div>
+
+                    <!-- Preview Alanı -->
+                    <div id="previewSection" style="display: none;">
+                        <div id="previewStats" class="mb-3">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="alert alert-success mb-0">
+                                        <strong>✅ Başarılı:</strong> <span id="successCount">0</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="alert alert-warning mb-0">
+                                        <strong>⚠️ Uyarı:</strong> <span id="warningCount">0</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="alert alert-danger mb-0">
+                                        <strong>❌ Hata:</strong> <span id="errorCount">0</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="alert alert-info mb-0">
+                                        <strong>📊 Toplam:</strong> <span id="totalCount">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive mb-3" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-sm table-hover" id="previewTable">
+                                <thead class="sticky-top bg-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Durum</th>
+                                        <th>Müze Adı</th>
+                                        <th>Şehir</th>
+                                        <th>Mesaj</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="previewTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-success" id="confirmBtn">
+                                <i class="fas fa-upload"></i> Onayla & İçeri Al
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="backBtn">
+                                <i class="fas fa-arrow-left"></i> Geri
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div id="loadingSpinner" style="display: none;" class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                        <p class="mt-2">İşleniyor...</p>
+                    </div>
+
+                    <!-- Result Message -->
+                    <div id="resultMessage" style="display: none;" class="alert mt-3" role="alert">
+                    </div>
+                </div>
+            </div>
+
+            <!-- CSV Template Download -->
+            <div class="mt-4">
+                <a href="javascript:void(0);" id="downloadTemplate" class="btn btn-info btn-sm">
+                    <i class="fas fa-download"></i> CSV Şablonu İndir
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const validateBtn = document.getElementById('validateBtn');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const backBtn = document.getElementById('backBtn');
+        const csvFile = document.getElementById('csvFile');
+        const uploadSection = document.getElementById('uploadSection');
+        const previewSection = document.getElementById('previewSection');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const resultMessage = document.getElementById('resultMessage');
+        const downloadTemplate = document.getElementById('downloadTemplate');
+
+        validateBtn.addEventListener('click', async () => {
+            if (!csvFile.files[0]) {
+                alert('Lütfen bir CSV dosyası seçin');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csvFile', csvFile.files[0]);
+
+            loadingSpinner.style.display = 'block';
+
+            try {
+                const response = await fetch('@Url.Action("ValidateAndPreview", "MuseumAdmin")', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    }
+                });
+
+                const data = await response.json();
+                loadingSpinner.style.display = 'none';
+
+                if (data.success) {
+                    displayPreview(data);
+                    uploadSection.style.display = 'none';
+                    previewSection.style.display = 'block';
+                } else {
+                    alert('Hata: ' + data.message);
+                }
+            } catch (error) {
+                loadingSpinner.style.display = 'none';
+                alert('Hata: ' + error.message);
+            }
+        });
+
+        confirmBtn.addEventListener('click', async () => {
+            if (!confirm('Tüm başarılı satırları veritabanına eklemek istediğinize emin misiniz?')) return;
+
+            loadingSpinner.style.display = 'block';
+
+            try {
+                const response = await fetch('@Url.Action("ConfirmAndImport", "MuseumAdmin")', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || '',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+
+                const data = await response.json();
+                loadingSpinner.style.display = 'none';
+
+                if (data.success) {
+                    resultMessage.className = 'alert alert-success';
+                    resultMessage.innerHTML = `
+                        <h5>✅ İşlem Başarılı</h5>
+                        <p>${data.message}</p>
+                    `;
+                    resultMessage.style.display = 'block';
+                    previewSection.style.display = 'none';
+
+                    setTimeout(() => {
+                        window.location.href = '@Url.Action("Index", "MuseumAdmin")';
+                    }, 2000);
+                } else {
+                    resultMessage.className = 'alert alert-danger';
+                    resultMessage.innerHTML = `<strong>❌ Hata:</strong> ${data.message}`;
+                    resultMessage.style.display = 'block';
+                }
+            } catch (error) {
+                loadingSpinner.style.display = 'none';
+                alert('Hata: ' + error.message);
+            }
+        });
+
+        backBtn.addEventListener('click', () => {
+            previewSection.style.display = 'none';
+            uploadSection.style.display = 'block';
+            csvFile.value = '';
+        });
+
+        downloadTemplate.addEventListener('click', () => {
+            const headers = ['MuseumName', 'City', 'District', 'Address', 'Description', 'CategoryName', 'ImageUrl', 'TicketPrice', 'OpeningHours', 'PhoneNumber', 'Email', 'Website', 'GoogleMapsUrl', 'IsFeatured', 'IsActive'];
+            const exampleRow = ['Pera Museum', 'İstanbul', 'Beyoğlu', 'Meşrutiyet Cad. No:65', 'Sanat eserleri koleksiyonu', 'Art Museum', 'https://example.com/image.jpg', '150', '09:00-18:00', '+90212...', 'info@example.com', 'https://example.com', 'https://maps.google.com/...', 'true', 'true'];
+
+            let csv = headers.join(',') + '\n';
+            csv += exampleRow.map(v => `"${v}"`).join(',');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'museum_import_template.csv';
+            a.click();
+        });
+
+        function displayPreview(data) {
+            document.getElementById('successCount').textContent = data.successCount;
+            document.getElementById('warningCount').textContent = data.warningCount;
+            document.getElementById('errorCount').textContent = data.errorCount;
+            document.getElementById('totalCount').textContent = data.results.length;
+
+            const tbody = document.getElementById('previewTableBody');
+            tbody.innerHTML = '';
+
+            data.results.forEach(row => {
+                const tr = document.createElement('tr');
+                const statusIcon = row.Status === 'Success' ? '✅' : row.Status === 'Warning' ? '⚠️' : '❌';
+                const statusColor = row.Status === 'Success' ? 'success' : row.Status === 'Warning' ? 'warning' : 'danger';
+
+                tr.innerHTML = `
+                    <td>${row.RowNumber}</td>
+                    <td><span class="badge bg-${statusColor}">${statusIcon} ${row.Status}</span></td>
+                    <td>${row.ItemName || '-'}</td>
+                    <td>${row.City || '-'}</td>
+                    <td><small>${row.Message}</small></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+}

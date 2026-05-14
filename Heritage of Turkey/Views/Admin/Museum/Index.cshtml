@@ -1,0 +1,136 @@
+﻿@model Heritage_of_Turkey.ViewModels.Admin.MuseumAdminListViewModel
+
+@{
+    ViewData["Title"] = "Museums";
+    ViewData["PaginationController"] = "MuseumAdmin";
+    ViewData["PaginationAction"] = "Index";
+    ViewData["PaginationSearchTerm"] = null;
+    ViewData["PaginationCategoryId"] = null;
+    Layout = "_AdminLayout";
+}
+
+<section class="bg-white border rounded-3 shadow-sm">
+    <div class="p-4 p-lg-5">
+        <div class="row align-items-end g-4">
+            <div class="col-12 col-lg-8">
+                <span class="badge rounded-pill text-bg-dark mb-3">Admin</span>
+                <h1 class="display-6 fw-bold mb-3">Museums</h1>
+                <p class="lead text-muted mb-0">Create and manage museum records shown on the public website.</p>
+            </div>
+            <div class="col-12 col-lg-4 text-lg-end">
+                <a asp-controller="MuseumAdmin" asp-action="Create" class="btn btn-primary">Create Museum</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="row g-4">
+        <div class="col-12 col-md-4">
+            <div class="bg-white border rounded-3 shadow-sm p-4">
+                <div class="text-muted small">Total</div>
+                <div class="h2 fw-bold mb-0">@Model.TotalCount</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="bg-white border rounded-3 shadow-sm p-4">
+                <div class="text-muted small">Active</div>
+                <div class="h2 fw-bold mb-0">@Model.ActiveCount</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="bg-white border rounded-3 shadow-sm p-4">
+                <div class="text-muted small">Featured</div>
+                <div class="h2 fw-bold mb-0">@Model.FeaturedCount</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pb-5">
+    @if (Model.Museums.Any())
+    {
+        <div class="table-responsive bg-white rounded-3 shadow-sm">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Museum</th>
+                        <th scope="col">Location</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Ticket</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var museum in Model.Museums)
+                    {
+                        var location = string.IsNullOrWhiteSpace(museum.District)
+                        ? museum.City
+                        : $"{museum.City}, {museum.District}";
+
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (!string.IsNullOrWhiteSpace(museum.ImageUrl))
+                                    {
+                                        <img src="@museum.ImageUrl" alt="@museum.MuseumName" class="rounded object-fit-cover" style="width: 64px; height: 48px;" />
+                                    }
+                                    <div>
+                                        <div class="fw-semibold">@museum.MuseumName</div>
+                                        <div class="small text-muted">@museum.CreatedDate.ToString("dd MMM yyyy")</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-muted">@location</td>
+                            <td>@museum.CategoryName</td>
+                            <td>
+                                @if (museum.TicketPrice.HasValue)
+                                {
+                                    <span>@museum.TicketPrice.Value.ToString("C")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Not listed</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    @if (museum.IsActive)
+                                    {
+                                        <span class="badge text-bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-secondary">Inactive</span>
+                                    }
+
+                                    @if (museum.IsFeatured)
+                                    {
+                                        <span class="badge text-bg-primary">Featured</span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Museum actions">
+                                    <a asp-controller="MuseumAdmin" asp-action="Details" asp-route-id="@museum.MuseumId" class="btn btn-outline-secondary">Details</a>
+                                    <a asp-controller="MuseumAdmin" asp-action="Edit" asp-route-id="@museum.MuseumId" class="btn btn-outline-primary">Edit</a>
+                                    <a asp-controller="MuseumAdmin" asp-action="Delete" asp-route-id="@museum.MuseumId" class="btn btn-outline-danger">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <partial name="_Pagination" model="Model.Pagination" />
+    }
+    else
+    {
+        <div class="bg-white rounded-3 shadow-sm p-4 p-md-5 text-center">
+            <h2 class="h4 fw-bold mb-3">No museums yet</h2>
+            <p class="text-muted mb-4">Create the first museum record to populate the public museum pages.</p>
+            <a asp-controller="MuseumAdmin" asp-action="Create" class="btn btn-primary">Create Museum</a>
+        </div>
+    }
+</section>

@@ -1,0 +1,71 @@
+﻿@model Heritage_of_Turkey.ViewModels.Contact.ContactViewModel
+
+@{
+    ViewData["Title"] = "Contact";
+}
+
+<section class="bg-white border-bottom">
+    <div class="container py-5">
+        <div class="row align-items-end g-4">
+            <div class="col-12 col-lg-8">
+                <span class="badge rounded-pill text-bg-primary mb-3">Contact</span>
+                <h1 class="display-6 fw-bold mb-3">Get in touch</h1>
+                <p class="lead text-muted mb-0">
+                    Send your questions, corrections, or suggestions about Turkey's museums and ruins from your signed-in account.
+                </p>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="bg-light rounded-3 p-3">
+                    <div class="fw-semibold mb-1">Heritage of Turkey</div>
+                    <div class="text-muted small">We review every message and use feedback to improve the visitor experience.</div>
+                    <a asp-controller="Contact" asp-action="Replies" class="btn btn-outline-primary btn-sm mt-3">Check Admin Reply</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4 justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="bg-white rounded-3 shadow-sm p-4 p-md-5">
+                    <form asp-controller="Contact" asp-action="Index" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+
+                        @if (ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                        {
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        }
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0">
+                                    Replies will be linked to your account and sent under <strong>@Model.Email</strong>.
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Subject" class="form-label"></label>
+                                <input asp-for="Subject" class="form-control" />
+                                <span asp-validation-for="Subject" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Message" class="form-label"></label>
+                                <textarea asp-for="Message" class="form-control" rows="7"></textarea>
+                                <span asp-validation-for="Message" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg mt-4">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

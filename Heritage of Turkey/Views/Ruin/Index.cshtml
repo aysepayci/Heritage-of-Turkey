@@ -1,0 +1,155 @@
+﻿@model Heritage_of_Turkey.ViewModels.Ruin.RuinListViewModel
+
+@{
+    ViewData["Title"] = "Ruins";
+    ViewData["PaginationController"] = "Ruin";
+    ViewData["PaginationAction"] = "Index";
+    ViewData["PaginationSearchTerm"] = Model.SearchTerm;
+    ViewData["PaginationCategoryId"] = Model.CategoryId;
+    var hasFilters = !string.IsNullOrWhiteSpace(Model.SearchTerm) || Model.CategoryId.HasValue;
+}
+
+<section class="bg-white border-bottom">
+    <div class="container py-5">
+        <div class="row align-items-end g-4">
+            <div class="col-12 col-lg-7">
+                <span class="badge rounded-pill text-bg-success mb-3">Ruins</span>
+                <h1 class="display-6 fw-bold mb-3">Explore ancient ruins across Turkey</h1>
+                <p class="lead text-muted mb-0">
+                    Browse ancient cities, theaters, temples, and archaeological sites with category filters and search.
+                </p>
+            </div>
+            <div class="col-12 col-lg-5">
+                <div class="bg-light rounded-3 p-3 text-lg-end">
+                    <div class="h3 fw-bold mb-0">@Model.TotalCount</div>
+                    <div class="text-muted">ruin@(Model.TotalCount == 1 ? "" : "s") found</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-4 border-bottom bg-light">
+    <div class="container">
+        <form asp-controller="Ruin" asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-12 col-lg-5">
+                <label asp-for="SearchTerm" class="form-label">Search</label>
+                <input asp-for="SearchTerm" class="form-control" placeholder="Search by name, city, district, address, description, or category" />
+            </div>
+
+            <div class="col-12 col-md-8 col-lg-5">
+                <label asp-for="CategoryId" class="form-label">Category</label>
+                <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                    <option value="">All categories</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-4 col-lg-2 d-grid">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+
+            @if (hasFilters)
+            {
+                <div class="col-12">
+                    <a asp-controller="Ruin" asp-action="Index" class="btn btn-sm btn-outline-secondary">Clear Filters</a>
+                </div>
+            }
+        </form>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        @if (hasFilters)
+        {
+            <div class="mb-4">
+                <h2 class="h5 mb-1">Filtered Results</h2>
+                <p class="text-muted mb-0">
+                    @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+                    {
+                        <span>Search: <strong>@Model.SearchTerm</strong></span>
+                    }
+                    @if (Model.CategoryId.HasValue)
+                    {
+                        <span class="ms-2">Category: <strong>@Model.SelectedCategoryName</strong></span>
+                    }
+                </p>
+            </div>
+        }
+
+        @if (Model.Ruins.Any())
+        {
+            <div class="row g-4">
+                @foreach (var ruin in Model.Ruins)
+                {
+                    var location = string.IsNullOrWhiteSpace(ruin.District)
+                    ? ruin.City
+                    : $"{ruin.City}, {ruin.District}";
+
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            @if (!string.IsNullOrWhiteSpace(ruin.ImageUrl))
+                            {
+                                <img src="@ruin.ImageUrl" class="card-img-top object-fit-cover" style="height: 230px;" alt="@ruin.RuinName" />
+                            }
+                            else
+                            {
+                                <div class="card-img-top bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 230px;">
+                                    <span class="h5 text-success mb-0">Ruin</span>
+                                </div>
+                            }
+
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                    <a asp-controller="Ruin" asp-action="Index" asp-route-categoryId="@ruin.CategoryId" class="badge text-bg-light text-decoration-none">
+                                        @ruin.CategoryName
+                                    </a>
+                                    @if (ruin.IsFeatured)
+                                    {
+                                        <span class="badge text-bg-success">Featured</span>
+                                    }
+                                </div>
+
+                                <h2 class="h5 card-title">@ruin.RuinName</h2>
+                                <p class="text-muted small mb-2">@location</p>
+
+                                @if (!string.IsNullOrWhiteSpace(ruin.OpeningHours))
+                                {
+                                    <p class="small text-muted mb-2">Opening hours: @ruin.OpeningHours</p>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(ruin.HistoricalPeriod))
+                                {
+                                    <p class="small text-muted mb-2">Historical period: @ruin.HistoricalPeriod</p>
+                                }
+
+                                <p class="card-text text-muted flex-grow-1">
+                                    @(ruin.Description.Length > 145 ? ruin.Description.Substring(0, 145) + "..." : ruin.Description)
+                                </p>
+
+                                <div class="d-flex justify-content-between align-items-center gap-3 mt-2">
+                                    <a asp-controller="Ruin" asp-action="Details" asp-route-id="@ruin.RuinId" class="btn btn-primary">View Details</a>
+                                    @if (ruin.TicketPrice.HasValue)
+                                    {
+                                        <span class="fw-semibold text-success">@ruin.TicketPrice.Value.ToString("C")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="small text-muted">Price not listed</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <partial name="_Pagination" model="Model.Pagination" />
+        }
+        else
+        {
+            <div class="alert alert-info mb-0" role="alert">
+                No ruins matched your search criteria.
+            </div>
+        }
+    </div>
+</section>

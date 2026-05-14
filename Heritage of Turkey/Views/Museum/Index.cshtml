@@ -1,0 +1,150 @@
+@model Heritage_of_Turkey.ViewModels.Museum.MuseumListViewModel
+
+@{
+    ViewData["Title"] = "Museums";
+    ViewData["PaginationController"] = "Museum";
+    ViewData["PaginationAction"] = "Index";
+    ViewData["PaginationSearchTerm"] = Model.SearchTerm;
+    ViewData["PaginationCategoryId"] = Model.CategoryId;
+    var hasFilters = !string.IsNullOrWhiteSpace(Model.SearchTerm) || Model.CategoryId.HasValue;
+}
+
+@*  Hero  *@
+<section style="background-color:var(--surface);border-bottom:1px solid var(--border-soft);">
+    <div class="container py-5">
+        <div class="row align-items-end g-4">
+            <div class="col-12 col-lg-7">
+                <span class="display-heading d-block mb-2">Explore Turkey</span>
+                <h1 style="font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;margin-bottom:.75rem;">
+                    Museums Across Turkey
+                </h1>
+                <p style="color:var(--text-secondary);font-size:1rem;max-width:500px;margin:0;line-height:1.75;">
+                    Browse archaeological, art, ethnography, and cultural museums with category filters and search.
+                </p>
+            </div>
+            <div class="col-12 col-lg-5">
+                <div style="background:var(--surface-soft);border:1px solid var(--border-faint);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;text-align:right;">
+                    <div style="font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--text);">@Model.TotalCount</div>
+                    <div style="font-family:var(--font-heading);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);">
+                        Museum@(Model.TotalCount == 1 ? "" : "s") Found
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@*  Filters  *@
+<section style="background-color:var(--surface-soft);border-bottom:1px solid var(--border-faint);padding:1.25rem 0;">
+    <div class="container">
+        <form asp-controller="Museum" asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-12 col-lg-5">
+                <label asp-for="SearchTerm" class="form-label">Search</label>
+                <input asp-for="SearchTerm" class="form-control" placeholder="Name, city, district, description…" />
+            </div>
+            <div class="col-12 col-md-8 col-lg-5">
+                <label asp-for="CategoryId" class="form-label">Category</label>
+                <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                    <option value="">All categories</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-4 col-lg-2 d-grid">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+            @if (hasFilters)
+            {
+                <div class="col-12">
+                    <a asp-controller="Museum" asp-action="Index" class="btn btn-sm" style="border:1px solid var(--border-soft);color:var(--text-secondary);background:transparent;">Clear Filters</a>
+                </div>
+            }
+        </form>
+    </div>
+</section>
+
+@*  Results  *@
+<section class="py-5">
+    <div class="container">
+        @if (hasFilters)
+        {
+            <div class="mb-4">
+                <p style="color:var(--text-secondary);font-size:.92rem;margin:0;">
+                    @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+                    {
+                        <span>Search: <strong style="color:var(--text);">@Model.SearchTerm</strong></span>
+                    }
+                    @if (Model.CategoryId.HasValue)
+                    {
+                        <span class="ms-2">Category: <strong style="color:var(--text);">@Model.SelectedCategoryName</strong></span>
+                    }
+                </p>
+            </div>
+        }
+
+        @if (Model.Museums.Any())
+        {
+            <div class="row g-4">
+                @foreach (var museum in Model.Museums)
+                {
+                    var location = string.IsNullOrWhiteSpace(museum.District)
+                        ? museum.City
+                        : $"{museum.City}, {museum.District}";
+
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <div class="card h-100 @(museum.IsFeatured ? "card-featured" : "")">
+                            @if (!string.IsNullOrWhiteSpace(museum.ImageUrl))
+                            {
+                                <img src="@museum.ImageUrl" class="card-img-top object-fit-cover" style="height:230px;" alt="@museum.MuseumName" />
+                            }
+                            else
+                            {
+                                <div class="card-img-top d-flex align-items-center justify-content-center" style="height:230px;background:var(--surface-inset);">
+                                    <span style="font-size:2.5rem;opacity:.4;">🏛️</span>
+                                </div>
+                            }
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                    <a asp-controller="Museum" asp-action="Index" asp-route-categoryId="@museum.CategoryId"
+                                       class="card-subtitle text-decoration-none">@museum.CategoryName</a>
+                                    @if (museum.IsFeatured)
+                                    {
+                                        <span class="badge badge-gold">Featured</span>
+                                    }
+                                </div>
+
+                                <h2 class="card-title">@museum.MuseumName</h2>
+                                <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:.4rem;">@location</p>
+
+                                @if (!string.IsNullOrWhiteSpace(museum.OpeningHours))
+                                {
+                                    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.4rem;">⏱ @museum.OpeningHours</p>
+                                }
+
+                                <p class="card-text flex-grow-1">
+                                    @(museum.Description.Length > 145 ? museum.Description.Substring(0, 145) + "…" : museum.Description)
+                                </p>
+
+                                <div class="d-flex justify-content-between align-items-center gap-3 mt-2">
+                                    <a asp-controller="Museum" asp-action="Details" asp-route-id="@museum.MuseumId" class="btn btn-primary">View Details</a>
+                                    @if (museum.TicketPrice.HasValue)
+                                    {
+                                        <span style="font-family:var(--font-body);font-weight:600;color:var(--success);">@museum.TicketPrice.Value.ToString("C")</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="font-size:.8rem;color:var(--text-muted);">Price not listed</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <partial name="_Pagination" model="Model.Pagination" />
+        }
+        else
+        {
+            <div class="alert alert-info">No museums matched your search criteria.</div>
+        }
+    </div>
+</section>

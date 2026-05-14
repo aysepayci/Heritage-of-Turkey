@@ -1,0 +1,178 @@
+@model Heritage_of_Turkey.ViewModels.Home.HomeViewModel
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+@*  ── HERO ──  *@
+<section style="background-color:var(--surface);border-bottom:1px solid var(--border-soft);position:relative;overflow:hidden;">
+    @*  Dekoratif arkaplan desen  *@
+    <div aria-hidden="true" style="position:absolute;top:0;right:0;width:50%;height:100%;background:radial-gradient(ellipse at 80% 50%,var(--gold-glow) 0%,transparent 65%);pointer-events:none;"></div>
+
+    <div class="container py-5 py-lg-6" style="position:relative;">
+        <div class="row align-items-center g-5">
+            <div class="col-12 col-lg-6">
+                <span class="display-heading mb-3 d-block">Turkey Museums &amp; Ruins</span>
+                <h1 class="mb-4" style="font-size:clamp(2rem,5vw,3rem);font-family:var(--font-display);font-weight:700;line-height:1.15;">
+                    Discover Turkey's<br /><em style="color:var(--gold);">Cultural Heritage</em>
+                </h1>
+                <p class="mb-5" style="font-size:1.1rem;color:var(--text-secondary);max-width:480px;line-height:1.8;">
+                    Explore remarkable museums, ancient cities, theaters, temples, and cultural routes across Turkey.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-3">
+                    <a asp-area="" asp-controller="Museum" asp-action="Index" class="btn btn-primary btn-lg px-4">Explore Museums</a>
+                    <a asp-area="" asp-controller="Ruin" asp-action="Index" class="btn btn-lg px-4" style="border:1px solid var(--border);color:var(--primary);background:transparent;font-family:var(--font-body);">Explore Ruins</a>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <div style="border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;background:var(--surface-soft);position:relative;">
+                    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-deep),var(--gold-light),var(--gold-deep));"></div>
+                    <div class="p-4 p-md-5">
+                        <div class="display-heading mb-3">At a Glance</div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div style="background:var(--surface);border:1px solid var(--border-faint);border-radius:var(--radius-md);padding:1.1rem 1rem;">
+                                    <div style="font-family:var(--font-display);font-size:2.4rem;font-weight:700;color:var(--text);line-height:1;">@Model.Statistics.MuseumCount</div>
+                                    <div style="font-family:var(--font-heading);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:.25rem;">Active Museums</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div style="background:var(--surface);border:1px solid var(--border-faint);border-radius:var(--radius-md);padding:1.1rem 1rem;">
+                                    <div style="font-family:var(--font-display);font-size:2.4rem;font-weight:700;color:var(--text);line-height:1;">@Model.Statistics.RuinCount</div>
+                                    <div style="font-family:var(--font-heading);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:.25rem;">Active Ruins</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div style="background:var(--surface);border:1px solid var(--border-faint);border-radius:var(--radius-md);padding:1.1rem 1rem;">
+                                    <div style="font-family:var(--font-display);font-size:2.4rem;font-weight:700;color:var(--text);line-height:1;">@Model.Statistics.CategoryCount</div>
+                                    <div style="font-family:var(--font-heading);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:.25rem;">Categories</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div style="background:linear-gradient(135deg,var(--gold-deep),var(--gold-light));border-radius:var(--radius-md);padding:1.1rem 1rem;">
+                                    <div style="font-family:var(--font-display);font-size:2.4rem;font-weight:700;color:#fff;line-height:1;">@Model.Statistics.FeaturedPlaceCount</div>
+                                    <div style="font-family:var(--font-heading);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-top:.25rem;">Featured Places</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@*  ── FEATURED MUSEUMS ──  *@
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+            <div>
+                <span class="display-heading d-block mb-1">Curated Selection</span>
+                <h2 style="font-family:var(--font-display);font-size:1.75rem;font-weight:600;margin:0;">Featured Museums</h2>
+                <p class="mb-0" style="color:var(--text-muted);margin-top:.25rem;font-size:.93rem;">Selected museums with rich collections and visitor experiences.</p>
+            </div>
+            <a asp-area="" asp-controller="Museum" asp-action="Index" class="btn btn-outline-primary">View All Museums</a>
+        </div>
+
+        @if (Model.FeaturedMuseums.Any())
+        {
+            <div class="row g-4">
+                @foreach (var museum in Model.FeaturedMuseums)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card card-featured h-100">
+                            @if (!string.IsNullOrWhiteSpace(museum.ImageUrl))
+                            {
+                                <img src="@museum.ImageUrl" class="card-img-top object-fit-cover" style="height:220px;" alt="@museum.MuseumName" />
+                            }
+                            else
+                            {
+                                <div class="card-img-top d-flex align-items-center justify-content-center" style="height:220px;background:var(--surface-inset);">
+                                    <span style="font-size:2.5rem;opacity:.4;">🏛️</span>
+                                </div>
+                            }
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                    <span class="card-subtitle">@museum.CategoryName</span>
+                                    @if (museum.TicketPrice.HasValue)
+                                    {
+                                        <span style="font-family:var(--font-body);font-size:.88rem;font-weight:600;color:var(--success);">@museum.TicketPrice.Value.ToString("C")</span>
+                                    }
+                                </div>
+                                <h3 class="card-title">@museum.MuseumName</h3>
+                                <p class="card-text mb-3" style="font-size:.82rem;">@museum.City@if (!string.IsNullOrWhiteSpace(museum.District)){ <span>, @museum.District</span> }</p>
+                                <p class="card-text flex-grow-1">
+                                    @(museum.Description.Length > 140 ? museum.Description.Substring(0, 140) + "…" : museum.Description)
+                                </p>
+                                <a asp-area="" asp-controller="Museum" asp-action="Details" asp-route-id="@museum.MuseumId" class="btn btn-primary mt-2">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">No featured museums are available yet.</div>
+        }
+    </div>
+</section>
+
+<hr class="gold-divider mx-auto" style="max-width:600px;" />
+
+@*  ── FEATURED RUINS ──  *@
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+            <div>
+                <span class="display-heading d-block mb-1">Ancient Sites</span>
+                <h2 style="font-family:var(--font-display);font-size:1.75rem;font-weight:600;margin:0;">Featured Ruins</h2>
+                <p class="mb-0" style="color:var(--text-muted);margin-top:.25rem;font-size:.93rem;">Ancient cities, theaters, temples, and archaeological sites to explore.</p>
+            </div>
+            <a asp-area="" asp-controller="Ruin" asp-action="Index" class="btn btn-outline-primary">View All Ruins</a>
+        </div>
+
+        @if (Model.FeaturedRuins.Any())
+        {
+            <div class="row g-4">
+                @foreach (var ruin in Model.FeaturedRuins)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            @if (!string.IsNullOrWhiteSpace(ruin.ImageUrl))
+                            {
+                                <img src="@ruin.ImageUrl" class="card-img-top object-fit-cover" style="height:220px;" alt="@ruin.RuinName" />
+                            }
+                            else
+                            {
+                                <div class="card-img-top d-flex align-items-center justify-content-center" style="height:220px;background:var(--surface-inset);">
+                                    <span style="font-size:2.5rem;opacity:.4;">🏺</span>
+                                </div>
+                            }
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                    <span class="card-subtitle">@ruin.CategoryName</span>
+                                    @if (ruin.TicketPrice.HasValue)
+                                    {
+                                        <span style="font-family:var(--font-body);font-size:.88rem;font-weight:600;color:var(--success);">@ruin.TicketPrice.Value.ToString("C")</span>
+                                    }
+                                </div>
+                                <h3 class="card-title">@ruin.RuinName</h3>
+                                <p class="card-text mb-3" style="font-size:.82rem;">@ruin.City@if (!string.IsNullOrWhiteSpace(ruin.District)){ <span>, @ruin.District</span> }</p>
+                                <p class="card-text flex-grow-1">
+                                    @(ruin.Description.Length > 140 ? ruin.Description.Substring(0, 140) + "…" : ruin.Description)
+                                </p>
+                                <a asp-area="" asp-controller="Ruin" asp-action="Details" asp-route-id="@ruin.RuinId" class="btn btn-primary mt-2">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">No featured ruins are available yet.</div>
+        }
+    </div>
+</section>

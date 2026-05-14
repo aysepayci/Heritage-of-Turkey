@@ -1,0 +1,42 @@
+﻿@model Heritage_of_Turkey.ViewModels.Admin.CategoryAdminFormViewModel
+
+@{
+    var formAction = Model.CategoryId == 0 ? "Create" : "Edit";
+}
+
+<form asp-controller="CategoryAdmin" asp-action="@formAction" asp-route-id="@Model.CategoryId" method="post" novalidate>
+    @Html.AntiForgeryToken()
+
+    @if (ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+    {
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    }
+
+    <input asp-for="CategoryId" type="hidden" />
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-8">
+            <label asp-for="CategoryName" class="form-label"></label>
+            <input asp-for="CategoryName" class="form-control" />
+            <span asp-validation-for="CategoryName" class="text-danger small"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="Description" class="text-danger small"></span>
+        </div>
+
+        <div class="col-12">
+            <div class="form-check form-switch">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label asp-for="IsActive" class="form-check-label"></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">Save Category</button>
+        <a asp-controller="CategoryAdmin" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>

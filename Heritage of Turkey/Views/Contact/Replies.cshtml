@@ -1,0 +1,67 @@
+@model Heritage_of_Turkey.ViewModels.Contact.ContactRepliesViewModel
+@using Heritage_of_Turkey.Models
+
+@{
+    ViewData["Title"] = "My Contact Replies";
+}
+
+<section class="bg-white border-bottom">
+    <div class="container py-5">
+        <span class="badge rounded-pill text-bg-primary mb-3">Contact</span>
+        <h1 class="display-6 fw-bold mb-3">My contact replies</h1>
+        <p class="lead text-muted mb-0">Messages and admin replies linked to your signed-in account.</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div class="text-muted">Signed in as <strong>@Model.UserEmail</strong></div>
+            <a asp-controller="Contact" asp-action="Index" class="btn btn-outline-primary">Send New Message</a>
+        </div>
+
+        @if (!Model.Messages.Any())
+        {
+            <div class="bg-white rounded-3 shadow-sm p-4 p-md-5 text-center">
+                <h2 class="h4 fw-bold mb-3">You have not sent any contact messages yet.</h2>
+                <p class="text-muted mb-4">When you send a message from your account, admin replies will appear here.</p>
+                <a asp-controller="Contact" asp-action="Index" class="btn btn-primary">Contact Us</a>
+            </div>
+        }
+        else
+        {
+            <div class="vstack gap-3">
+                @foreach (var message in Model.Messages)
+                {
+                    <article class="bg-white rounded-3 shadow-sm p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-3">
+                            <div>
+                                <h2 class="h5 fw-bold mb-1">@(string.IsNullOrWhiteSpace(message.Subject) ? "No subject" : message.Subject)</h2>
+                                <div class="text-muted small">@message.CreatedAt.ToString("dd MMM yyyy HH:mm")</div>
+                            </div>
+                            <span class="badge @(message.Status == ContactMessageStatus.Replied ? "text-bg-success" : message.Status == ContactMessageStatus.Read ? "text-bg-secondary" : "text-bg-warning") align-self-start">@message.Status</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="fw-semibold mb-2">Your Message</div>
+                            <p class="text-muted mb-0" style="white-space: pre-line;">@message.Message</p>
+                        </div>
+
+                        <div class="border-top pt-3">
+                            <div class="fw-semibold mb-2">Admin Reply</div>
+                            @if (!string.IsNullOrWhiteSpace(message.AdminReply))
+                            {
+                                <p class="mb-1" style="white-space: pre-line;">@message.AdminReply</p>
+                                <div class="small text-muted">Replied at @message.RepliedAt?.ToString("dd MMM yyyy HH:mm")</div>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">Admin has not replied yet.</p>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</section>

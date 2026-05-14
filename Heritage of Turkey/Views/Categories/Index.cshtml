@@ -1,0 +1,50 @@
+@model IEnumerable<Heritage_of_Turkey.Models.Category>
+
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+            <div>
+                <p class="text-uppercase text-primary fw-semibold small mb-2">Explore by theme</p>
+                <h1 class="display-6 fw-bold mb-2">Categories</h1>
+                <p class="text-muted mb-0">Browse museums and ruins grouped by heritage category.</p>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info mb-0">No active categories were found.</div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var category in Model)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <article class="card h-100 shadow-sm border-0">
+                            <div class="card-body d-flex flex-column">
+                                <h2 class="h5 fw-bold">@category.CategoryName</h2>
+                                <p class="text-muted flex-grow-1">
+                                    @(string.IsNullOrWhiteSpace(category.Description)
+                                        ? "Discover heritage places in this category."
+                                        : category.Description)
+                                </p>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a asp-area="" asp-controller="Museum" asp-action="Index" asp-route-categoryId="@category.CategoryId" class="btn btn-sm btn-outline-primary">
+                                        Museums (@category.Museums.Count)
+                                    </a>
+                                    <a asp-area="" asp-controller="Ruin" asp-action="Index" asp-route-categoryId="@category.CategoryId" class="btn btn-sm btn-outline-success">
+                                        Ruins (@category.Ruins.Count)
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

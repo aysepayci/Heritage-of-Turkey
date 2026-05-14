@@ -1,0 +1,59 @@
+@model Heritage_of_Turkey.ViewModels.Contact.ContactMessageDetailViewModel
+@using Heritage_of_Turkey.Models
+
+@{
+    ViewData["Title"] = "Contact Message Details";
+    Layout = "_AdminLayout";
+    var statusClass = Model.Status == ContactMessageStatus.Replied
+        ? "text-bg-success"
+        : Model.Status == ContactMessageStatus.Read ? "text-bg-secondary" : "text-bg-warning";
+}
+
+<section class="bg-white border rounded-3 shadow-sm p-4 p-lg-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+        <div>
+            <span class="badge rounded-pill text-bg-dark mb-3">Admin</span>
+            <h1 class="h3 fw-bold mb-1">@(string.IsNullOrWhiteSpace(Model.Subject) ? "No subject" : Model.Subject)</h1>
+            <p class="text-muted mb-0">@Model.Name - <a href="mailto:@Model.Email">@Model.Email</a></p>
+        </div>
+        <div class="d-flex gap-2 align-items-start">
+            <span class="badge @statusClass">@Model.Status</span>
+            <a asp-controller="ContactMessages" asp-action="Index" class="btn btn-outline-secondary btn-sm">Back to Messages</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-6">
+            <div class="border rounded-3 p-4 h-100">
+                <h2 class="h5 fw-bold mb-3">Message</h2>
+                <dl class="row gy-2 small">
+                    <dt class="col-sm-4 text-muted">Created</dt>
+                    <dd class="col-sm-8">@Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</dd>
+                    <dt class="col-sm-4 text-muted">Read</dt>
+                    <dd class="col-sm-8">@(Model.ReadDate.HasValue ? Model.ReadDate.Value.ToString("dd MMM yyyy HH:mm") : "Not read")</dd>
+                    <dt class="col-sm-4 text-muted">Replied</dt>
+                    <dd class="col-sm-8">@(Model.RepliedAt.HasValue ? Model.RepliedAt.Value.ToString("dd MMM yyyy HH:mm") : "Not replied")</dd>
+                </dl>
+                <p class="text-muted mb-0" style="white-space: pre-line;">@Model.Message</p>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="border rounded-3 p-4 h-100">
+                <h2 class="h5 fw-bold mb-3">Reply</h2>
+                <form asp-controller="ContactMessages" asp-action="Reply" asp-route-id="@Model.ContactMessageId" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input asp-for="ContactMessageId" type="hidden" />
+                    <label asp-for="ReplyText" class="form-label"></label>
+                    <textarea asp-for="ReplyText" class="form-control" rows="8"></textarea>
+                    <span asp-validation-for="ReplyText" class="text-danger small"></span>
+                    <button type="submit" class="btn btn-primary mt-3">Save Reply</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

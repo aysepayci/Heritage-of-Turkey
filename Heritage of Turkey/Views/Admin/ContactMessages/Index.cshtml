@@ -1,0 +1,96 @@
+@model Heritage_of_Turkey.ViewModels.Contact.ContactMessageListViewModel
+@using Heritage_of_Turkey.Models
+
+@{
+    ViewData["Title"] = "Contact Messages";
+    Layout = "_AdminLayout";
+}
+
+<section class="bg-white border rounded-3 shadow-sm">
+    <div class="p-4 p-lg-5">
+        <div class="row align-items-end g-4">
+            <div class="col-12 col-lg-8">
+                <span class="badge rounded-pill text-bg-dark mb-3">Admin</span>
+                <h1 class="display-6 fw-bold mb-3">Contact Messages</h1>
+                <p class="lead text-muted mb-0">
+                    Review messages submitted from the public contact form.
+                </p>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="row g-3">
+                    <div class="col-4">
+                        <div class="bg-light rounded-3 p-3 text-center">
+                            <div class="h3 fw-bold mb-0">@Model.TotalCount</div>
+                            <div class="small text-muted">Total</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light rounded-3 p-3 text-center">
+                            <div class="h3 fw-bold mb-0">@Model.UnreadCount</div>
+                            <div class="small text-muted">Unread</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light rounded-3 p-3 text-center">
+                            <div class="h3 fw-bold mb-0">@Model.RepliedCount</div>
+                            <div class="small text-muted">Replied</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div>
+        @if (Model.Messages.Any())
+        {
+            <div class="table-responsive bg-white rounded-3 shadow-sm">
+                <table class="table table-hover align-middle mb-0 admin-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Sender</th>
+                            <th scope="col">Subject</th>
+                            <th scope="col">Message</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var message in Model.Messages)
+                        {
+                            var statusClass = message.Status == ContactMessageStatus.Replied
+                                ? "text-bg-success"
+                                : message.Status == ContactMessageStatus.Read ? "text-bg-secondary" : "text-bg-warning";
+
+                            <tr class="@(message.Status == ContactMessageStatus.Unread ? "table-warning" : "")">
+                                <td>
+                                    <div class="fw-semibold">@message.Name</div>
+                                    <a href="mailto:@message.Email" class="small text-decoration-none">@message.Email</a>
+                                </td>
+                                <td class="fw-semibold">@(string.IsNullOrWhiteSpace(message.Subject) ? "No subject" : message.Subject)</td>
+                                <td class="text-muted" style="min-width: 280px;">
+                                    @(message.Message.Length > 160 ? message.Message.Substring(0, 160) + "..." : message.Message)
+                                </td>
+                                <td class="text-muted small">@message.CreatedAt.ToString("dd MMM yyyy HH:mm")</td>
+                                <td><span class="badge @statusClass">@message.Status</span></td>
+                                <td class="text-end">
+                                    <a asp-controller="ContactMessages" asp-action="Details" asp-route-id="@message.ContactMessageId" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="bg-white rounded-3 shadow-sm p-4 p-md-5 text-center">
+                <h2 class="h4 fw-bold mb-3">No messages yet</h2>
+                <p class="text-muted mb-0">Contact form submissions will appear here.</p>
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,102 @@
+﻿@model Heritage_of_Turkey.ViewModels.Admin.CategoryAdminListViewModel
+
+@{
+    ViewData["Title"] = "Categories";
+    Layout = "_AdminLayout";
+}
+
+<section class="bg-white border rounded-3 shadow-sm">
+    <div class="p-4 p-lg-5">
+        <div class="row align-items-end g-4">
+            <div class="col-12 col-lg-8">
+                <span class="badge rounded-pill text-bg-dark mb-3">Admin</span>
+                <h1 class="display-6 fw-bold mb-3">Categories</h1>
+                <p class="lead text-muted mb-0">Create and manage museum and ruin categories.</p>
+            </div>
+            <div class="col-12 col-lg-4 text-lg-end">
+                <a asp-controller="CategoryAdmin" asp-action="Create" class="btn btn-primary">Create Category</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="row g-4">
+        <div class="col-12 col-md-4">
+            <div class="bg-white border rounded-3 shadow-sm p-4">
+                <div class="text-muted small">Total</div>
+                <div class="h2 fw-bold mb-0">@Model.TotalCount</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="bg-white border rounded-3 shadow-sm p-4">
+                <div class="text-muted small">Active</div>
+                <div class="h2 fw-bold mb-0">@Model.ActiveCount</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="bg-white border rounded-3 shadow-sm p-4">
+                <div class="text-muted small">Inactive</div>
+                <div class="h2 fw-bold mb-0">@Model.InactiveCount</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pb-5">
+    @if (Model.Categories.Any())
+    {
+        <div class="table-responsive bg-white rounded-3 shadow-sm">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Category</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Related Items</th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@category.CategoryName</td>
+                            <td class="text-muted" style="min-width: 260px;">
+                                @(string.IsNullOrWhiteSpace(category.Description) ? "No description" : category.Description)
+                            </td>
+                            <td class="text-muted small">@category.MuseumCount museums, @category.RuinCount ruins</td>
+                            <td class="text-muted small">@category.CreatedDate.ToString("dd MMM yyyy")</td>
+                            <td>
+                                @if (category.IsActive)
+                                {
+                                    <span class="badge text-bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-secondary">Inactive</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Category actions">
+                                    <a asp-controller="CategoryAdmin" asp-action="Details" asp-route-id="@category.CategoryId" class="btn btn-outline-secondary">Details</a>
+                                    <a asp-controller="CategoryAdmin" asp-action="Edit" asp-route-id="@category.CategoryId" class="btn btn-outline-primary">Edit</a>
+                                    <a asp-controller="CategoryAdmin" asp-action="Delete" asp-route-id="@category.CategoryId" class="btn btn-outline-danger">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="bg-white rounded-3 shadow-sm p-4 p-md-5 text-center">
+            <h2 class="h4 fw-bold mb-3">No categories yet</h2>
+            <p class="text-muted mb-4">Create the first category to organize museums and ruins.</p>
+            <a asp-controller="CategoryAdmin" asp-action="Create" class="btn btn-primary">Create Category</a>
+        </div>
+    }
+</section>

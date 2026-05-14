@@ -1,0 +1,45 @@
+@model Heritage_of_Turkey.ViewModels.Shared.PaginationViewModel
+
+@{
+    var actionName = ViewData["PaginationAction"]?.ToString() ?? "Index";
+    var controllerName = ViewData["PaginationController"]?.ToString();
+    var searchTerm = ViewData["PaginationSearchTerm"]?.ToString();
+    var categoryId = ViewData["PaginationCategoryId"];
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4" aria-label="Pagination">
+        <ul class="pagination justify-content-center flex-wrap gap-1">
+            <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                <a class="page-link"
+                   asp-controller="@controllerName"
+                   asp-action="@actionName"
+                   asp-route-page="@(Model.CurrentPage - 1)"
+                   asp-route-searchTerm="@searchTerm"
+                   asp-route-categoryId="@categoryId">Previous</a>
+            </li>
+
+            @for (var pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
+            {
+                <li class="page-item @(pageNumber == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link"
+                       asp-controller="@controllerName"
+                       asp-action="@actionName"
+                       asp-route-page="@pageNumber"
+                       asp-route-searchTerm="@searchTerm"
+                       asp-route-categoryId="@categoryId">@pageNumber</a>
+                </li>
+            }
+
+            <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                <a class="page-link"
+                   asp-controller="@controllerName"
+                   asp-action="@actionName"
+                   asp-route-page="@(Model.CurrentPage + 1)"
+                   asp-route-searchTerm="@searchTerm"
+                   asp-route-categoryId="@categoryId">Next</a>
+            </li>
+        </ul>
+    </nav>
+}

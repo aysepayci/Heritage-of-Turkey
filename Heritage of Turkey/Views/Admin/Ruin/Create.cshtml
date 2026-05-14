@@ -1,0 +1,25 @@
+﻿@model Heritage_of_Turkey.ViewModels.Admin.RuinAdminFormViewModel
+
+@{
+    ViewData["Title"] = "Create Ruin";
+    Layout = "_AdminLayout";
+}
+
+<section class="bg-white border rounded-3 shadow-sm p-4 p-lg-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+        <div>
+            <span class="badge rounded-pill text-bg-dark mb-3">Admin</span>
+            <h1 class="h3 fw-bold mb-1">Create Ruin</h1>
+            <p class="text-muted mb-0">Add a ruin with visitor information, history, and an image.</p>
+        </div>
+        <div>
+            <a asp-controller="RuinAdmin" asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+        </div>
+    </div>
+
+    <partial name="~/Views/Admin/Ruin/_RuinForm.cshtml" model="Model" />
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

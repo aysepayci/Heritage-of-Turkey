@@ -1,0 +1,64 @@
+﻿@model Heritage_of_Turkey.ViewModels.Admin.CategoryAdminDetailViewModel
+
+@{
+    ViewData["Title"] = Model.CategoryName;
+    Layout = "_AdminLayout";
+}
+
+<section class="bg-white border rounded-3 shadow-sm p-4 p-lg-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+        <div>
+            <span class="badge rounded-pill text-bg-dark mb-3">Admin</span>
+            <h1 class="h3 fw-bold mb-1">@Model.CategoryName</h1>
+            <p class="text-muted mb-0">Category details and related content counts.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="CategoryAdmin" asp-action="Edit" asp-route-id="@Model.CategoryId" class="btn btn-primary">Edit</a>
+            <a asp-controller="CategoryAdmin" asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <dl class="row mb-0 gy-3">
+                <dt class="col-sm-3 text-muted">Name</dt>
+                <dd class="col-sm-9">@Model.CategoryName</dd>
+
+                <dt class="col-sm-3 text-muted">Description</dt>
+                <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description" : Model.Description)</dd>
+
+                <dt class="col-sm-3 text-muted">Created</dt>
+                <dd class="col-sm-9">@Model.CreatedDate.ToString("dd MMM yyyy HH:mm")</dd>
+
+                <dt class="col-sm-3 text-muted">Status</dt>
+                <dd class="col-sm-9">
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge text-bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge text-bg-secondary">Inactive</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="bg-light rounded-3 p-3 text-center">
+                        <div class="h3 fw-bold mb-0">@Model.MuseumCount</div>
+                        <div class="small text-muted">Museums</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-light rounded-3 p-3 text-center">
+                        <div class="h3 fw-bold mb-0">@Model.RuinCount</div>
+                        <div class="small text-muted">Ruins</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

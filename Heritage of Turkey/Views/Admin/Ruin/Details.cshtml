@@ -1,0 +1,82 @@
+﻿@model Heritage_of_Turkey.ViewModels.Admin.RuinAdminDetailViewModel
+
+@{
+    ViewData["Title"] = Model.RuinName;
+    Layout = "_AdminLayout";
+    var location = string.IsNullOrWhiteSpace(Model.District) ? Model.City : $"{Model.City}, {Model.District}";
+    var statusBadgeClass = Model.IsActive ? "text-bg-success" : "text-bg-secondary";
+    var statusText = Model.IsActive ? "Active" : "Inactive";
+}
+
+<section class="bg-white border rounded-3 shadow-sm p-4 p-lg-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+        <div>
+            <span class="badge rounded-pill text-bg-dark mb-3">Admin</span>
+            <h1 class="h3 fw-bold mb-1">@Model.RuinName</h1>
+            <p class="text-muted mb-0">@location</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="RuinAdmin" asp-action="Edit" asp-route-id="@Model.RuinId" class="btn btn-primary">Edit</a>
+            <a asp-controller="RuinAdmin" asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-5">
+            @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.RuinName" class="img-fluid rounded-3 border w-100" />
+            }
+            else
+            {
+                <div class="bg-light rounded-3 d-flex align-items-center justify-content-center" style="min-height: 260px;">
+                    <span class="text-muted">No image</span>
+                </div>
+            }
+        </div>
+        <div class="col-12 col-lg-7">
+            <dl class="row gy-3 mb-0">
+                <dt class="col-sm-4 text-muted">Category</dt>
+                <dd class="col-sm-8">@Model.CategoryName</dd>
+
+                <dt class="col-sm-4 text-muted">Address</dt>
+                <dd class="col-sm-8">@Model.Address</dd>
+
+                <dt class="col-sm-4 text-muted">Ticket Price</dt>
+                <dd class="col-sm-8">@(Model.TicketPrice.HasValue? Model.TicketPrice.Value.ToString("C") : "Not listed")</dd>
+
+                <dt class="col-sm-4 text-muted">Opening Hours</dt>
+                <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.OpeningHours) ? "Not listed" : Model.OpeningHours)</dd>
+
+                <dt class="col-sm-4 text-muted">Historical Period</dt>
+                <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.HistoricalPeriod) ? "Not listed" : Model.HistoricalPeriod)</dd>
+
+                <dt class="col-sm-4 text-muted">Google Maps</dt>
+                <dd class="col-sm-8">
+                    @if (!string.IsNullOrWhiteSpace(Model.GoogleMapsUrl))
+                    {
+                        <a href="@Model.GoogleMapsUrl" target="_blank" rel="noopener noreferrer">View on Google Maps</a>
+                    }
+                    else
+                    {
+                        <span>Not listed</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-4 text-muted">Status</dt>
+                <dd class="col-sm-8">
+                    <span class="badge @statusBadgeClass">@statusText</span>
+
+                    @if (Model.IsFeatured)
+                    {
+                        <span class="badge text-bg-primary">Featured</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+        <div class="col-12">
+            <h2 class="h5 fw-bold">Description</h2>
+            <p class="text-muted mb-0" style="white-space: pre-line;">@Model.Description</p>
+        </div>
+    </div>
+</section>
